@@ -5,8 +5,8 @@ class _Leaf:
         self.idx  = list()
     
     def __add__(self, value):
-        self.path.append(value[0])
-        self.idx.append(value[1])
+        self.path.insert(0, value[0])
+        self.idx.insert(0, value[1])
         return self
 
 
@@ -59,7 +59,7 @@ class Tree:
             np.random.seed(seed)
         
         node_len = len(leaves) - 1
-        self.weights = np.random.randn(node_len, h_size)
+        self.weights = np.random.randn(h_size, node_len)
         
         self._root = self._build_tree(leaves)
     
@@ -69,26 +69,28 @@ class Tree:
         leaves = list(self._leaves.values())
         nodes = list()
 
-        id = 0
+        id = len(leaves) - 2
         while True:
             if len(leaves) > 1:
-                node = _Node(id, leaves.pop(), leaves.pop())
-                nodes.append(node)
+                b, a = leaves.pop(), leaves.pop()
+                node = _Node(id, a, b)
+                nodes.insert(0, node)
             elif len(nodes) > 1:
-                node = _Node(id, nodes.pop(), nodes.pop())
+                b, a = nodes.pop(), nodes.pop()
+                node = _Node(id, a, b)
                 nodes.insert(0, node)
             else:
                 node = _Node(id, nodes.pop(), leaves.pop())
                 nodes.append(node)
             
-            id += 1
+            id -= 1
             if len(leaves) == 0 and len(nodes) == 1:
                 root = nodes[-1]
                 return root
     
     def __getitem__(self, index):
         indexes = self._leaves[index].idx
-        return self.weights[indexes]
+        return self.weights[:,indexes]
     
     def get_indexes(self, index):
         return self._leaves[index].idx
@@ -98,4 +100,4 @@ class Tree:
     
     def __setitem__(self, index, value):
         indexes = self._leaves[index].idx
-        self.weights[indexes] = value
+        self.weights[:,indexes] = value
